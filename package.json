@@ -3,17 +3,17 @@
   "version": "1.0.0",
   "license": "MIT",
   "scripts": {
-    "start": "ts-node ./main.ts",
+    "serve": "ts-node ./main.ts",
     "build": "rm -rf dist && tsc -p .",
-    "startBuild": "node ./dist/main.js"
+    "start": "node ./dist/main.js"
   },
   "devDependencies": {
-    "rxjs": "^6.3.3",
     "ts-node": "^7.0.1",
     "typescript": "^3.1.6"
   },
   "dependencies": {
     "@types/inquirer": "^0.0.43",
+    "chalk": "^2.4.1",
     "inquirer": "^6.2.0"
   }
 }

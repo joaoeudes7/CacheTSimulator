@@ -1,7 +1,7 @@
 import { memoryToBytes, decimalToBin, mapperMemory, mapperSlot, slotInBytes, formatBinary, checkExist } from "./utils";
 
 /**
- * Class Cache (Simulador de Cache usando Mapeamento Direto)
+ * (Simulador de Cache)
  * @author joaoeudes7<joaoeudes7@gmail.com>
  */
 export class Cache {
