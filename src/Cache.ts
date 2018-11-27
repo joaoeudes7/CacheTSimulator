@@ -102,6 +102,10 @@ export class Cache {
     return Math.log2(this.memoryInBytes);
   }
 
+  get typeMapping(): TypeMapping {
+    return this.slotsPerConjunt % 2;
+  }
+
   /**
    * @description Retorna o Formato de instrução com seus respectivos tamanhos
    */
@@ -112,7 +116,7 @@ export class Cache {
     return { tag, index, offset }
   }
 
-  get sizeDataPerBlock() { // [(MpBits) * wordsPerSlot * slotsPerConjunt] (bytes)
+  get sizeDataPerBlock() { // [MpBits * wordsPerSlot * slotsPerConjunt] (bytes)
     return (this.memoryInBits * this.wordsPerSlot * this.slotsPerConjunt);
   }
 
@@ -147,4 +151,9 @@ export class Cache {
 
     return radio;
   }
+}
+
+enum TypeMapping {
+  associative = 0,
+  direct = 1,
 }

@@ -11,7 +11,7 @@ function requestInputs() {
   const questions: inquirer.Questions = [{
     type: 'input',
     name: 'memory',
-    message: 'Tamanho da memória Principal (4 GB):',
+    message: 'Tamanho da memória Principal:',
     validate: (input) => {
       const { size, unit } = mapperMemory(input);
       if (isValidSize(size, unit)) {
@@ -24,7 +24,7 @@ function requestInputs() {
   {
     type: 'input',
     name: 'slotsCache',
-    message: 'Slot no Cache (2 KB):'
+    message: 'Slot no Cache:'
   },
   {
     type: 'input',
@@ -60,23 +60,6 @@ function requestInputs() {
     .then(() => requestInputDemoMemory())
 }
 
-function showResult() {
-  console.log(`
-    Memoria Principal: ${cache.memoryInBytes} bytes²
-    Blocos por Conjunto: ${cache.slotsPerConjunt}
-    Palavras por Bloco: ${cache.wordsPerSlot}
-
-    // MAPEAMENTO DIRETO
-    TAG ${cache.formatInstruction.tag} (bits)
-    IND ${cache.formatInstruction.index} (bits)
-    OFF ${cache.formatInstruction.offset} (bits)
-
-    Tamanho do bloco: ${cache.sizeBlock} bytes
-    Tamanho total de Palavras por bloco: ${cache.sizeDataPerBlock} bytes²
-    Total de bits usados no cache: ${cache.memoryInBits} bits
-  `)
-}
-
 async function requestInputDemoMemory() {
   let option = null;
   while (option !== 'exit') {
@@ -107,6 +90,22 @@ async function requestInputDemoMemory() {
       })
       .then(() => showRatio())
   }
+}
+
+function showResult() {
+  console.log(`
+    Memoria Principal: ${cache.memoryInBytes} bytes
+    Blocos por Conjunto: ${cache.slotsPerConjunt}
+    Palavras por Bloco: ${cache.wordsPerSlot}
+
+    // MAPEAMENTO ${cache.typeMapping ? 'DIRETO' : 'ASSOCIATIVO'}
+    TAG ${cache.formatInstruction.tag} (bits)
+    IND ${cache.formatInstruction.index} (bits)
+    OFF ${cache.formatInstruction.offset} (bits)
+
+    Tamanho total de Palavras por bloco: ${cache.sizeDataPerBlock} bytes
+    Total de bits usados no cache: ${cache.memoryInBits} bits
+  `)
 }
 
 function showRatio() {

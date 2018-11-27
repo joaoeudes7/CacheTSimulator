@@ -45,9 +45,12 @@ export function mapperMemory(value: string) {
  */
 export function formatBinary(bitsRequerids: number, instruction: string) {
   const qtd = bitsRequerids - instruction.length;
-  const bits = '0'.repeat(qtd);
+  if (qtd > 0) {
+    const bits = '0'.repeat(qtd);
+    instruction = bits + instruction;
+  }
 
-  return bits + instruction;
+  return instruction;
 }
 
   /**
