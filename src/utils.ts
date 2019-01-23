@@ -1,7 +1,8 @@
 import { isNumber } from 'util';
 
+const units = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+
 export function memoryToBytes(size: number, unit: string) {
-  const units = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
   return size * Math.pow(1024, units.indexOf(unit))
 }
 
@@ -65,9 +66,7 @@ export function formatBinary(bitsRequerids: number, instruction: string) {
   }
 
 export function isValidSize(size: number, unit: string) {
-  const units = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-
-  const isUnit = units.some(_unit => _unit === unit);
+  const isUnit = units.includes(unit);
   const isSizeValid = (isNumber(size) && (memoryToBytes(size, unit) % 2) == 0 && size > 0);
   return (isSizeValid && isUnit);
 }

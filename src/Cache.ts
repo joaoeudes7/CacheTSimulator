@@ -59,7 +59,10 @@ export class Cache {
         this.miss++;
         if (this.data[index].length == this.slotsPerConjunt) {
           this.collisions++;
-          this.data[index].shift() // Remove first item
+          // Remove random item
+          const len = this.data[index].length
+          const randomItem = Math.floor(Math.random() * len);
+          this.data[index].splice(randomItem, 1);
         }
         this.data[index].push(tag);
       }

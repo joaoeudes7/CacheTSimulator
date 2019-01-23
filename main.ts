@@ -120,7 +120,7 @@ function showRatio() {
 
 function showMemory(addressHex: string) {
   const _andressBin = formatBinary(cache.memoryInBits, hexToBin(addressHex))
-  const {tag, index} = getInfoInstruction(_andressBin, cache.formatInstruction)
+  const { tag, index } = getInfoInstruction(_andressBin, cache.formatInstruction)
 
   console.log(`
   Endereço:
