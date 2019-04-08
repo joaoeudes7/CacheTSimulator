@@ -57,13 +57,17 @@ export class Cache {
       } else {
         this.written++;
         this.miss++;
+
+        // Verifica se o cache está cheio
         if (this.data[index].length == this.slotsPerConjunt) {
           this.collisions++;
-          // Remove random item
+          // Remove um item aleatório (1 das opções que podem ser feitas)
           const len = this.data[index].length
           const randomItem = Math.floor(Math.random() * len);
           this.data[index].splice(randomItem, 1);
         }
+
+        // Add nova tag
         this.data[index].push(tag);
       }
     } else {
