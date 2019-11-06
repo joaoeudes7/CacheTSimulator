@@ -1,5 +1,5 @@
 import { QuestionCollection } from "inquirer";
-import { isValidSize, mapperMemory } from "../utils";
+import { isValidSize, mapperMemory } from "./utils";
 
 export const requestConfigs: QuestionCollection = [{
   type: 'input',

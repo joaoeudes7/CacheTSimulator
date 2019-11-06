@@ -1,7 +1,7 @@
 import inquirer = require("inquirer");
 import { Cache } from './models/Cache';
 import { randonHex } from "./utils";
-import { requestConfigs, requestAdress, requestManualAddress } from "./models/questions";
+import { requestConfigs, requestAdress, requestManualAddress } from "./questions";
 import { showInfoCache, showMemory, showRatioOfCache } from "./logs";
 
 async function createCache() {
