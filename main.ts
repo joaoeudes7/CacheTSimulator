@@ -8,7 +8,7 @@ let cache: Cache;
 requestInputs()
 
 function requestInputs() {
-  const questions: inquirer.Questions = [{
+  const questions: inquirer.QuestionCollection = [{
     type: 'input',
     name: 'memory',
     message: 'Tamanho da memória Principal:',
@@ -63,7 +63,7 @@ function requestInputs() {
 async function requestInputDemoMemory() {
   let option = null;
   while (option !== 'exit') {
-    const question: inquirer.Question =
+    const question: inquirer.QuestionCollection =
     {
       type: 'list',
       name: 'option',
@@ -80,7 +80,7 @@ async function requestInputDemoMemory() {
         option = data['option'];
 
         if (option == 'insert') {
-          const questionAddress: inquirer.Question = { name: 'adress', message: 'Endereço:' }
+          const questionAddress: inquirer.QuestionCollection = { name: 'adress', message: 'Endereço:' }
           await inquirer.prompt(questionAddress)
             .then(data => showMemory(data['adress']))
         } else if (option == 'random') {
