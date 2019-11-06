@@ -30,8 +30,12 @@ async function demoMemory(cache: Cache) {
     adress = randonHex(cache.memoryInBytes)
   }
 
-  showMemory(cache, adress);
-  showRatioOfCache(cache)
+  try {
+    showMemory(cache, adress);
+    showRatioOfCache(cache);
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 

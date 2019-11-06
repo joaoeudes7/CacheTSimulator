@@ -1,4 +1,4 @@
-import { mapperMemory, mapperSlot, formatBinary, decimalToBin, checkExist, slotInBytes, memoryToBytes } from "../utils";
+import { mapperMemory, mapperSlot, formatBinary, decimalToBin, itemExist, slotInBytes, memoryToBytes } from "../utils";
 
 /**
  * (Simulador de Cache)
@@ -45,33 +45,58 @@ export class Cache {
     }
   }
 
+  private upReads() {
+    this.reads++;
+  }
+
+  private upCollisions() {
+    this.collisions++;
+  }
+
+  private upMiss() {
+    this.written++;
+    this.miss++;
+  }
+
+  private upHits() {
+    this.hits++
+  }
+
+  private removeRandomItem(index: string) {
+    const len = this.data[index].length;
+    const randomItem = Math.floor(Math.random() * len);
+    this.data[index].splice(randomItem, 1);
+  }
+
+  private addTag(index: string, tag: string) {
+    this.data[index].push(tag);
+  }
+
   /**
    * @description O Método pega o index e a tag e determina se é resulta em um Hit ou Miss
    * @param adress   - ID do índice
    */
   getData(tag: string, index: string) {
-    if (checkExist(Object.keys(this.data), index)) {
-      this.reads++;
-      if (checkExist(this.data[index], tag)) {
-        this.hits++
-      } else {
-        this.written++;
-        this.miss++;
+    if (!itemExist(Object.keys(this.data), index)) {
+      throw `Endereço inválido! A índice ${index} está fora da faixa`;
+    }
 
-        // Verifica se o cache está cheio
-        if (this.data[index].length == this.slotsPerConjunt) {
-          this.collisions++;
-          // Remove um item aleatório (1 das opções que podem ser feitas)
-          const len = this.data[index].length
-          const randomItem = Math.floor(Math.random() * len);
-          this.data[index].splice(randomItem, 1);
-        }
+    this.upReads();
 
-        // Add nova tag
-        this.data[index].push(tag);
-      }
+    if (itemExist(this.data[index], tag)) {
+      this.upHits();
     } else {
-      console.log(`Endereço inválido! A índice ${index} está fora da faixa`)
+      this.upMiss();
+
+      // Verifica se o cache está cheio
+      if (this.data[index].length == this.slotsPerConjunt) {
+        this.upCollisions();
+
+        // Remove um item aleatório (1 das opções que podem ser feitas)
+        this.removeRandomItem(index);
+      }
+
+      this.addTag(index, tag)
     }
   }
 
@@ -120,6 +145,7 @@ export class Cache {
     const tag = this.bitsTag;
     const index = this.bitsIndex;
     const offset = this.bitsOffset;
+
     return { tag, index, offset }
   }
 

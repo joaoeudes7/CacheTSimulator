@@ -17,12 +17,12 @@ export const requestConfigs: QuestionCollection = [{
 {
   type: 'input',
   name: 'slotsCache',
-  message: 'Slot no Cache:'
+  message: 'Slots no Cache:'
 },
 {
   type: 'input',
   name: 'slotsPerConjunt',
-  message: 'Conjuntos por Slot:',
+  message: 'Slots por Conjunto:',
   validate: (input: string) => {
     if ((/\d+/).exec(input)) {
       return true
