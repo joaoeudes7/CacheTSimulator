@@ -1,4 +1,4 @@
-import { memoryToBytes, decimalToBin, mapperMemory, mapperSlot, slotInBytes, formatBinary, checkExist } from "./utils";
+import { mapperMemory, mapperSlot, formatBinary, decimalToBin, checkExist, slotInBytes, memoryToBytes } from "../utils";
 
 /**
  * (Simulador de Cache)

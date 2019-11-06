@@ -14,12 +14,12 @@ export function checkExist(array: any, object: any) {
   return array.indexOf(object) > -1
 }
 
-export function mapperSlot(value: string){
+export function mapperSlot(value: string) {
   const _value = value.replace(/\s+/g, '').toUpperCase();
   const size = +_value.replace(/[a-zA-Z]/g, '');
   const unit = _value.replace(/\d+/g, '');
 
-  return { size,  unit }
+  return { size, unit }
 }
 
 export function slotInBytes(size: number, unit: string) {
@@ -54,16 +54,16 @@ export function formatBinary(bitsRequerids: number, instruction: string) {
   return instruction;
 }
 
-  /**
-   * @description Retorna a Tag, o Índice e o Offset da instrução
-   * @param instruction   - ID da instrução que deseja consultar
-   * @param format        - formatação de bits de instrução (tag, index, offset)
-   */
-  export function getInfoInstruction(instruction: string, format: {tag: number, index: number, offset?: number}) {
-    const tag = instruction.slice(0, format.tag);
-    const index = instruction.slice(format.tag, (format.tag + format.index));
-    return { tag, index };
-  }
+/**
+ * @description Retorna a Tag, o Índice e o Offset da instrução
+ * @param instruction   - ID da instrução que deseja consultar
+ * @param format        - formatação de bits de instrução (tag, index, offset)
+ */
+export function getInfoInstruction(instruction: string, format: { tag: number, index: number, offset?: number }) {
+  const tag = instruction.slice(0, format.tag);
+  const index = instruction.slice(format.tag, (format.tag + format.index));
+  return { tag, index };
+}
 
 export function isValidSize(size: number, unit: string) {
   const isUnit = units.includes(unit);
