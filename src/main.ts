@@ -33,6 +33,7 @@ async function demoMemory(cache: Cache) {
   try {
     showMemory(cache, adress);
     showRatioOfCache(cache);
+    demoMemory(cache);
   } catch (error) {
     console.log(error);
   }

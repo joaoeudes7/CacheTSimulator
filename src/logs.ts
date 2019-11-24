@@ -5,8 +5,11 @@ import { formatBinary, hexToBin, getInfoInstruction } from "./utils";
 function showInfoCache(cache: Cache) {
   console.log(`
     Memoria Principal: ${cache.memoryInBytes} bytes
-    Blocos por Conjunto: ${cache.slotsPerConjunt}
-    Palavras por Bloco: ${cache.wordsPerSlot}
+    Blocos: ${cache.blocks}
+    Palavras: ${cache.wordsInBlock}
+
+    MP Bytes: ${cache.memoryInBytes}
+    Bits: ${cache.memoryInBits}
 
     // MAPEAMENTO ${cache.typeMapping ? 'DIRETO' : 'ASSOCIATIVO'}
     TAG ${cache.formatInstruction.tag} (bits)
@@ -14,7 +17,6 @@ function showInfoCache(cache: Cache) {
     OFF ${cache.formatInstruction.offset} (bits)
 
     Tamanho total de Palavras por bloco: ${cache.sizeDataPerBlock} bytes
-    Total de bits usados no cache: ${cache.memoryInBits} bits
   `)
 }
 
