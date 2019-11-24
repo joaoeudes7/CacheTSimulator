@@ -49,8 +49,8 @@ export const requestAdress: QuestionCollection = {
   name: 'option',
   message: 'O que deseja fazer?',
   choices: [
-    { value: 'insert', name: 'Inserir endereço' },
     { value: 'random', name: 'Gerar endereço Aleatório' },
+    { value: 'insert', name: 'Inserir endereço' },
     { value: 'exit', name: 'Sair' }
   ]
 }
