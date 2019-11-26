@@ -1,4 +1,18 @@
-import { mapperMemory, mapperSlot, formatBinary, decimalToBin, itemExist, slotInBytes, memoryToBytes } from "../utils";
+import { mapperMemory, formatBinary, cacheToBytes, memoryToBytes, convert, mapperBlock, getInfoInstruction } from "../utils";
+import { SlotMemory, TypeMapping, ResultAccess } from "./types";
+import { Conjunt, Block } from "./Conjunt";
+import { History } from "./History";
+
+declare global {
+  interface Array<T> {
+    exists(content: any): boolean
+  }
+}
+
+Array.prototype.exists = function (content: any) {
+  return this.indexOf(content) > -1
+}
+
 
 /**
  * (Simulador de Cache)
@@ -6,12 +20,12 @@ import { mapperMemory, mapperSlot, formatBinary, decimalToBin, itemExist, slotIn
  */
 export class Cache {
 
-  public memory: { size: number, unit: string };
-  public slot: { size: number, unit: string };
-  public slotsPerConjunt: number;
-  public wordsPerSlot: number;
+  public memoryP: SlotMemory;
+  public blocks: number;
+  public blocksPerConjunt: number;
+  public wordsPerBlock: number;
 
-  public data: { [idBin: string]: any[] } = {};
+  public conjunt: Conjunt = {};
 
   public reads: number = 0;      // Leituras no Cache
   public written: number = 0;    // Escritas no Cache
@@ -20,17 +34,19 @@ export class Cache {
   public miss: number = 0;       // Número de erros (Não encontrado na Cache)
   public collisions: number = 0; // Número de colisões
 
+  public history: History[] = [];
+
   /**
    * @param memory            - memória principal
-   * @param slots             - quantidade de slots na Cache
-   * @param slotsPerConjunt   - quantidade de slots por conjunto (Potência de 2)
-   * @param wordsPerSlot      - quantidade palavras por slot (Potência de 2)
+   * @param blocks        - total de slots no Cache
+   * @param blocksPerConjunt            - quantidade de blocos por conjunto (Potência de 2)
+   * @param wordsInBlock      - quantidade palavras por bloco (Potência de 2)
    */
-  constructor(memory: string, slots: string, slotsPerConjunt: number, wordsPerSlot: number) {
-    this.memory = mapperMemory(memory);
-    this.slot = mapperSlot(slots);
-    this.slotsPerConjunt = +slotsPerConjunt;
-    this.wordsPerSlot = +wordsPerSlot;
+  constructor(memory: string, blocks: string, blocksPerConjunt: number, wordsInBlock: number) {
+    this.memoryP = mapperMemory(memory);
+    this.blocks = mapperBlock(blocks);
+    this.blocksPerConjunt = +blocksPerConjunt;
+    this.wordsPerBlock = +wordsInBlock;
 
     this.initSlots();
   }
@@ -39,9 +55,14 @@ export class Cache {
    * Inicializando blocos
    */
   private initSlots() {
-    for (let num = 0; num < this.slotInBytes; num++) {
-      const block = formatBinary(this.bitsIndex, decimalToBin(num));
-      this.data[block] = []
+    if (this.typeMapping == TypeMapping.fullAssociative) {
+      this.conjunt['0'] = new Block();
+    } else {
+      for (let num = 0; num < (this.blocks / this.blocksPerConjunt); num++) {
+        const index = formatBinary(this.bitsIndex, convert.dec2bin(num.toString()));
+
+        this.conjunt[index] = new Block();
+      }
     }
   }
 
@@ -60,44 +81,54 @@ export class Cache {
 
   private upHits() {
     this.hits++
+
+    this.history.push()
   }
 
-  private removeRandomItem(index: string) {
-    const len = this.data[index].length;
-    const randomItem = Math.floor(Math.random() * len);
-    this.data[index].splice(randomItem, 1);
-  }
+  private removeLastItem(block: Block) {
+    const len = block.data.length;
 
-  private addTag(index: string, tag: string) {
-    this.data[index].push(tag);
+    block.data.splice(len - 1, 1);
   }
 
   /**
    * @description O Método pega o index e a tag e determina se é resulta em um Hit ou Miss
    * @param adress   - ID do índice
    */
-  getData(tag: string, index: string) {
-    if (!itemExist(Object.keys(this.data), index)) {
-      throw `Endereço inválido! A índice ${index} está fora da faixa`;
+  getData(addressHex: string) {
+    const bin = formatBinary(this.memoryInBits, convert.hex2bin(addressHex))
+    const { tag, index, offset } = getInfoInstruction(bin, this.formatInstruction)
+
+    if (!Object.keys(this.conjunt).exists(index)) {
+      throw `Endereço inválido! O índice ${index || 'NULL'} está fora da faixa ou nula`;
     }
 
     this.upReads();
 
-    if (itemExist(this.data[index], tag)) {
+    const actualConjunt = this.conjunt[index];
+
+    if (actualConjunt.data.exists(tag)) {
       this.upHits();
+
+      this.history.push(new History(bin, ResultAccess.success));
     } else {
       this.upMiss();
+      actualConjunt.setValid();
 
       // Verifica se o cache está cheio
-      if (this.data[index].length == this.slotsPerConjunt) {
+      if (actualConjunt.data.length == this.blocksPerConjunt) {
         this.upCollisions();
+        this.history.push(new History(bin, ResultAccess.collision));
 
         // Remove um item aleatório (1 das opções que podem ser feitas)
-        this.removeRandomItem(index);
+        this.removeLastItem(actualConjunt);
+      } else {
+        this.history.push(new History(bin, ResultAccess.empty));
       }
-
-      this.addTag(index, tag)
     }
+
+    // change position to address recent
+    actualConjunt.data = [...new Set([tag, ...actualConjunt.data])]
   }
 
   /**
@@ -107,27 +138,36 @@ export class Cache {
    */
   setData(index: number, data: any) {
     this.written++;
-    this.data[index] = data;
+    this.conjunt[index] = data;
   }
 
-  get bitsIndex() { // [log2(sizeCacheInBytes/blocksPerConjunt)] (bits)
-    return Math.log2(this.slotInBytes / this.slotsPerConjunt);
+  /**
+   * log2(blocks/blocksPerConjunt) (bits)
+   */
+  get bitsIndex() {
+    return Math.log2(this.blocks / this.blocksPerConjunt);
   }
 
-  get bitsOffset() { // [log2(WORDS) + 2 || log2(wordsPerBlock*4) ] (bits)
-    return Math.log2(this.wordsPerSlot) + 2;
+  /**
+   * log2(wordsPerBlock) (bits)
+   */
+  get bitsOffset() {
+    return Math.log2(this.wordsPerBlock);
   }
 
-  get bitsTag() { // [(MpBits-1) – (n + m) || (MpBits - n - m - 2) + 1] (bits)
+  /**
+   * (MpBits) – (n + m) (bits)
+   */
+  get bitsTag() {
     return (this.memoryInBits) - (this.bitsIndex + this.bitsOffset);
   }
 
-  get slotInBytes() {
-    return slotInBytes(this.slot.size, this.slot.unit);
+  get cacheInBytes() {
+    return this.sizeBlock * this.blocks;
   }
 
   get memoryInBytes() {
-    return memoryToBytes(this.memory.size, this.memory.unit);
+    return memoryToBytes(this.memoryP);
   }
 
   get memoryInBits() {
@@ -135,7 +175,13 @@ export class Cache {
   }
 
   get typeMapping(): TypeMapping {
-    return this.slotsPerConjunt % 2;
+    if (this.blocksPerConjunt == 1) {
+      return TypeMapping.direct
+    } else if (this.blocks == this.blocksPerConjunt) {
+      return TypeMapping.fullAssociative
+    } else {
+      return TypeMapping.associative
+    }
   }
 
   /**
@@ -149,23 +195,22 @@ export class Cache {
     return { tag, index, offset }
   }
 
-  get sizeDataPerBlock() { // [MpBits * wordsPerSlot * slotsPerConjunt] (bytes)
-    return (this.memoryInBits * this.wordsPerSlot * this.slotsPerConjunt);
-  }
-
-  get sizeBlock() { // [log2(m) * MpBits] (bytes)
-    return Math.pow(2, this.bitsOffset + this.memoryInBits);
+  /**
+   * @description retorna o tamanho de um bloco
+   * log2(m) * MpBits (bytes)
+   */
+  get sizeBlock() {
+    return Math.pow(2, this.bitsOffset)
   }
 
   /**
+   *
    * @description Valor total de bits na cache usando Mapeamento Direto
    */
   get totalOfBits(): number { // [2^indice * ((sizeBlock) + (sizeTag))] (bits)
-    const memoryInBits = this.memoryInBits;
-    const index = this.bitsIndex;
-    const sizeBlock = Math.pow(2, memoryInBits);
-    const sizeTag = this.bitsTag
-    return Math.pow(2, index) * ((sizeBlock + memoryInBits) + sizeTag);
+    const { bitsTag, bitsIndex, sizeBlock, memoryInBits } = this;
+
+    return Math.pow(2, bitsIndex) * ((sizeBlock + memoryInBits) + bitsTag);
   }
 
   /**
@@ -186,7 +231,3 @@ export class Cache {
   }
 }
 
-enum TypeMapping {
-  associative = 0,
-  direct = 1,
-}

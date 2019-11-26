@@ -1,45 +1,40 @@
 import { isNumber } from "util";
+import { SlotMemory, FormatInstruction } from "./models/types";
 
-const units = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+const unitsMemory = ['', 'KB', 'MB', 'GB', 'TB'];
+const unitsBlock = ['', 'K', 'M', 'G'];
 
-type FormatInstruction = { tag: number, index: number, offset?: number }
+export function memoryToBytes(memory: SlotMemory) {
+  return memory.size * Math.pow(1024, unitsMemory.indexOf(memory.unit))
+}
 
-export function memoryToBytes(size: number, unit: string) {
-  return size * Math.pow(1024, units.indexOf(unit))
+export function cacheToBytes(memory: SlotMemory) {
+  return memory.size * Math.pow(2, unitsBlock.indexOf(memory.unit))
 }
 
 export function randonHex(lim: number) {
   return '0x' + Math.floor(Math.random() * lim).toString(16).toUpperCase()
 }
 
-export function itemExist(array: any, object: any) {
-  return array.indexOf(object) > -1
-}
-
-export function mapperSlot(value: string) {
-  const _value = value.replace(/\s+/g, '').toUpperCase();
-  const size = +_value.replace(/[a-zA-Z]/g, '');
-  const unit = _value.replace(/\d+/g, '');
-
-  return { size, unit }
-}
-
-export function slotInBytes(size: number, unit: string) {
-  const units = ['', 'K', 'M', 'G']
-
-  return size * Math.pow(1024, units.indexOf(unit))
-}
-
 /**
  * Formats memory (Remove spaces and Uppercase, and return size and unit)
  * @param value Value of Memory Primary
  */
-export function mapperMemory(value: string) {
+export function mapperMemory(value: string): SlotMemory {
+  // Clear spaces
   const _value = value.replace(/\s+/g, '').toUpperCase();
+  // Extract letters
   const size = +_value.replace(/[a-zA-Z]/g, '');
+  // Extract numbers
   const unit = _value.replace(/\d+/g, '');
 
   return { size, unit }
+}
+
+export function mapperBlock(value: string): number {
+  const { size, unit } = mapperMemory(value);
+
+  return size * Math.pow(1024, unitsBlock.indexOf(unit));
 }
 
 /**
@@ -63,27 +58,30 @@ export function formatBinary(bitsRequerids: number, instruction: string) {
  * @param format        - formatação de bits de instrução (tag, index, offset)
  */
 export function getInfoInstruction(instruction: string, format: FormatInstruction) {
-  const tag = instruction.slice(0, format.tag);
-  const index = instruction.slice(format.tag, (format.tag + format.index));
+  const limIndex = (format.tag + format.index);
 
-  return { tag, index };
+  const tag = instruction.slice(0, format.tag);
+  const index = instruction.slice(format.tag, limIndex) || '0';
+  const offset = instruction.slice(limIndex)
+
+  return { tag, index, offset };
 }
 
 export function isValidSize(size: number, unit: string) {
-  const isUnit = units.includes(unit);
-  const isSizeValid = (isNumber(size) && (memoryToBytes(size, unit) % 2) == 0 && size > 0);
+  const isUnit = unitsMemory.includes(unit);
+  const isSizeValid = (isNumber(size) && (memoryToBytes({ size, unit }) % 2) == 0 && size > 0);
 
   return (isSizeValid && isUnit);
 }
 
-export function decimalToBin(value: number) {
-  return Number(value).toString(2);
-}
-
-export function binToDecimal(value: string) {
-  return parseInt(value, 2);
-}
-
-export function hexToBin(value: string) {
-  return parseInt(value, 16).toString(2)
-}
+/**
+ * Utils to Convert
+ */
+export const convert = {
+  bin2dec: (s: string) => Number(parseInt(s, 2).toString(10)),
+  bin2hex: (s: string) => '0x' + parseInt(s, 2).toString(16),
+  dec2bin: (s: string) => parseInt(s, 10).toString(2),
+  dec2hex: (s: string) => parseInt(s, 10).toString(16),
+  hex2bin: (s: string) => parseInt(s, 16).toString(2),
+  hex2dec: (s: string) => Number(parseInt(s, 16).toString(10))
+};

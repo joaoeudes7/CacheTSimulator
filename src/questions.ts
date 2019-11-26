@@ -17,12 +17,12 @@ export const requestConfigs: QuestionCollection = [{
 {
   type: 'input',
   name: 'slotsCache',
-  message: 'Slots no Cache:'
+  message: 'Blocos no cache:'
 },
 {
   type: 'input',
   name: 'slotsPerConjunt',
-  message: 'Slots por Conjunto:',
+  message: 'Blocos por conjunto:',
   validate: (input: string) => {
     if ((/\d+/).exec(input)) {
       return true
@@ -34,7 +34,7 @@ export const requestConfigs: QuestionCollection = [{
 {
   type: 'input',
   name: 'wordsPerSlot',
-  message: 'Palavras por Conjunto:',
+  message: 'Palavras por bloco:',
   validate: (input: string) => {
     if ((/\d+/).exec(input)) {
       return true
@@ -57,5 +57,5 @@ export const requestAdress: QuestionCollection = {
 
 export const requestManualAddress: QuestionCollection = {
   name: 'adress',
-  message: 'Endereço:'
+  message: 'Endereço(ou endereços separados por virgula):'
 }

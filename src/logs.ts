@@ -1,22 +1,25 @@
-import { Cache } from "./models/Cache";
 import chalk from 'chalk';
-import { formatBinary, hexToBin, getInfoInstruction } from "./utils";
+
+import { Cache } from "./models/Cache";
+import { formatBinary, getInfoInstruction, convert } from "./utils";
+import { ResultAccess } from './models/types';
 
 function showInfoCache(cache: Cache) {
   console.log(`
     Memoria Principal: ${cache.memoryInBytes} bytes
-    Blocos: ${cache.blocks}
-    Palavras: ${cache.wordsInBlock}
-
-    MP Bytes: ${cache.memoryInBytes}
     Bits: ${cache.memoryInBits}
+    Memoria Cache: ${cache.cacheInBytes} bytes
+    Blocos: ${cache.blocksPerConjunt}
+    Palavras: ${cache.wordsPerBlock}
 
-    // MAPEAMENTO ${cache.typeMapping ? 'DIRETO' : 'ASSOCIATIVO'}
+    // MAPEAMENTO ${cache.typeMapping}
     TAG ${cache.formatInstruction.tag} (bits)
     IND ${cache.formatInstruction.index} (bits)
     OFF ${cache.formatInstruction.offset} (bits)
 
-    Tamanho total de Palavras por bloco: ${cache.sizeDataPerBlock} bytes
+    Tamanho do bloco: ${cache.sizeBlock} bytes
+    Tamanho do cache: ${cache.cacheInBytes} bytes
+
   `)
 }
 
@@ -24,29 +27,37 @@ function showRatioOfCache(cache: Cache) {
   console.log(chalk`
     Leituras no Cache: ${cache.reads} vezes
     Escritas no Cache: ${cache.written} vezes
-    Conflitos: ${cache.collisions} vezes
+    Conflitos: {yellow ${cache.collisions} vezes}
     Miss rate: {redBright ${cache.miss} / ${cache.ratio.miss}% (erro)}
     Hits rate: {greenBright ${cache.hits} / ${cache.ratio.hits}% (sucesso)}
   `);
 }
 
 function showMemory(cache: Cache, addressHex: string) {
-  const _andressBin = formatBinary(cache.memoryInBits, hexToBin(addressHex))
-  const { tag, index } = getInfoInstruction(_andressBin, cache.formatInstruction)
+  const bin = formatBinary(cache.memoryInBits, convert.hex2bin(addressHex))
+  const { tag, index, offset } = getInfoInstruction(bin, cache.formatInstruction)
+
+  let stringsHistoryColorid: string[] = []
+  cache.history.forEach(h => {
+    if (h.result == ResultAccess.empty) {
+      stringsHistoryColorid.push(chalk.red(h.address))
+    } else if (h.result == ResultAccess.collision) {
+      stringsHistoryColorid.push(chalk.yellow(h.address))
+    } else {
+      stringsHistoryColorid.push(chalk.green(h.address))
+    }
+  });
 
   console.log(`
+  Histórico: [${stringsHistoryColorid}]
   Endereço:
     HEX: ${addressHex}
-    BIN: ${_andressBin}
+    BIN: ${chalk.green(tag) + chalk.blue(index) + chalk.red(offset)}
     TAG: [${tag}]     INDEX: [${index}]
   `)
 
-  cache.getData(tag, index);
-
-  for (const index of Object.keys(cache.data)) {
-    if (cache.data[index].length) {
-      console.log(`    {${chalk.blueBright(index)}}: [ ${chalk.whiteBright(cache.data[index])} ]`)
-    }
+  for (const index of Object.keys(cache.conjunt).sort()) {
+    console.log(`    {${chalk.blue(index)}}: [${chalk.bold(cache.conjunt[index].v)}][ ${chalk.green(cache.conjunt[index].data)} ]`)
   }
 }
 

@@ -12,6 +12,7 @@
 
 ## Requeriments
 - Nodejs Installed
+- Npm or Yarn (packages manager) installed
 
 # Usage
 ### Install Dependencies

@@ -1,6 +1,8 @@
 import inquirer = require("inquirer");
+import chalk from 'chalk';
+
 import { Cache } from './models/Cache';
-import { randonHex } from "./utils";
+import { randonHex, convert } from "./utils";
 import { requestConfigs, requestAdress, requestManualAddress } from "./questions";
 import { showInfoCache, showMemory, showRatioOfCache } from "./logs";
 
@@ -21,22 +23,41 @@ async function demoMemory(cache: Cache) {
     return;
   }
 
-  let adress = null;
+  let address = '';
 
   if (option == 'insert') {
     const data = await inquirer.prompt(requestManualAddress)
-    adress = data['adress']
+    const addressesBin = extractAddresses(data['adress'])
+    const addressesHex = addressesBin.map(b => convert.bin2hex(b))
+
+    address = addressesHex[addressesHex.length - 1]
+    addressesHex.forEach(address => {
+      cache.getData(address)
+    })
   } else {
-    adress = randonHex(cache.memoryInBytes)
+    const randomAddress = randonHex(cache.memoryInBytes);
+
+    address = randomAddress
+    cache.getData(randomAddress);
   }
 
   try {
-    showMemory(cache, adress);
+    showInfoCache(cache)
+    showMemory(cache, address);
     showRatioOfCache(cache);
-    demoMemory(cache);
   } catch (error) {
-    console.log(error);
+    console.log(`${chalk.red(error)}`);
   }
+
+  demoMemory(cache);
+}
+
+function extractAddresses(stringAddresses: string) {
+  // Formatter: remove spaces, [ ]
+  const _stringAddresses = stringAddresses.replace(' ', '').replace('[', '').replace(']', '');
+  const addresses = _stringAddresses.split(',')
+  // Clear []
+  return addresses
 }
 
 
