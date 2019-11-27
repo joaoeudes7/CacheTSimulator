@@ -53,10 +53,10 @@ async function demoMemory(cache: Cache) {
 }
 
 function extractAddresses(stringAddresses: string) {
-  // Formatter: remove spaces, [ ]
-  const _stringAddresses = stringAddresses.replace(' ', '').replace('[', '').replace(']', '');
+  // Formatter: remove spaces && symbols
+  const _stringAddresses = stringAddresses.replace(/\s+/g, '').replace('[', '').replace(']', '');
   const addresses = _stringAddresses.split(',')
-  // Clear []
+
   return addresses
 }
 
