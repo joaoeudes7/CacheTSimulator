@@ -3,17 +3,6 @@ import { SlotMemory, TypeMapping, ResultAccess } from "./types";
 import { Conjunt, Block } from "./Conjunt";
 import { History } from "./History";
 
-declare global {
-  interface Array<T> {
-    exists(content: any): boolean
-  }
-}
-
-Array.prototype.exists = function (content: any) {
-  return this.indexOf(content) > -1
-}
-
-
 /**
  * (Simulador de Cache)
  * @author joaoeudes7<joaoeudes7@gmail.com>
@@ -99,7 +88,7 @@ export class Cache {
     const bin = formatBinary(this.memoryInBits, convert.hex2bin(addressHex))
     const { tag, index } = getInfoInstruction(bin, this.formatInstruction)
 
-    if (!Object.keys(this.conjunt).exists(index)) {
+    if (!Object.keys(this.conjunt).includes(index)) {
       throw `Endereço inválido! O índice ${index || 'NULL'} está fora da faixa ou nula`;
     }
 
@@ -107,7 +96,7 @@ export class Cache {
 
     const actualConjunt = this.conjunt[index];
 
-    if (actualConjunt.data.exists(tag)) {
+    if (actualConjunt.data.includes(tag)) {
       this.upHits();
 
       this.history.push(new History(bin, ResultAccess.success));

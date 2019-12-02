@@ -1,13 +1,13 @@
-import inquirer = require("inquirer");
 import chalk from 'chalk';
+import { prompt } from 'inquirer';
 
 import { Cache } from './models/Cache';
-import { randonHex, convert } from "./utils";
+import { convert } from "./utils";
 import { requestConfigs, requestAdress, requestManualAddress } from "./questions";
 import { showInfoCache, showMemory, showRatioOfCache } from "./logs";
 
 async function createCache() {
-  const data = await inquirer.prompt(requestConfigs)
+  const data = await prompt(requestConfigs)
   const { memory, slotsCache, slotsPerConjunt, wordsPerSlot } = data;
 
   const cache = new Cache(memory, slotsCache, slotsPerConjunt, wordsPerSlot);
@@ -17,7 +17,7 @@ async function createCache() {
 }
 
 async function demoMemory(cache: Cache) {
-  const { option } = await inquirer.prompt(requestAdress)
+  const { option } = await prompt(requestAdress)
 
   if (option == 'exit') {
     return;
@@ -26,7 +26,7 @@ async function demoMemory(cache: Cache) {
   let address = '';
 
   if (option == 'insert') {
-    const data = await inquirer.prompt(requestManualAddress)
+    const data = await prompt(requestManualAddress)
     const addressesBin = extractAddresses(data['adress'])
     const addressesHex = addressesBin.map(b => convert.bin2hex(b))
 
