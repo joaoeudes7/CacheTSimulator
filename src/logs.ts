@@ -17,7 +17,7 @@ function showInfoCache(cache: Cache) {
     IND ${cache.formatInstruction.index} (bits)
     OFF ${cache.formatInstruction.offset} (bits)
 
-    Tamanho do bloco: ${cache.sizeBlock} bytes
+    Tamanho do bloco: ${cache.conjuntInBytes} bytes
     Tamanho do cache: ${cache.cacheInBytes} bytes
 
   `)

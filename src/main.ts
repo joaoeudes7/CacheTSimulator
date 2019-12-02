@@ -35,10 +35,8 @@ async function demoMemory(cache: Cache) {
       cache.getData(address)
     })
   } else {
-    const randomAddress = randonHex(cache.memoryInBytes);
-
-    address = randomAddress
-    cache.getData(randomAddress);
+    address = cache.getRandomAddress()
+    cache.getData(address);
   }
 
   try {

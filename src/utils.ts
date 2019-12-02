@@ -2,14 +2,10 @@ import { isNumber } from "util";
 import { SlotMemory, FormatInstruction } from "./models/types";
 
 const unitsMemory = ['', 'KB', 'MB', 'GB', 'TB'];
-const unitsBlock = ['', 'K', 'M', 'G'];
+const unitsBlock = ['', 'K'];
 
 export function memoryToBytes(memory: SlotMemory) {
   return memory.size * Math.pow(1024, unitsMemory.indexOf(memory.unit))
-}
-
-export function cacheToBytes(memory: SlotMemory) {
-  return memory.size * Math.pow(2, unitsBlock.indexOf(memory.unit))
 }
 
 export function randonHex(lim: number) {
@@ -34,7 +30,7 @@ export function mapperMemory(value: string): SlotMemory {
 export function mapperBlock(value: string): number {
   const { size, unit } = mapperMemory(value);
 
-  return size * Math.pow(1024, unitsBlock.indexOf(unit));
+  return size * Math.pow(1000, unitsBlock.indexOf(unit));
 }
 
 /**

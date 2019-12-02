@@ -1,4 +1,4 @@
-import { mapperMemory, formatBinary, cacheToBytes, memoryToBytes, convert, mapperBlock, getInfoInstruction } from "../utils";
+import { mapperMemory, formatBinary, memoryToBytes, convert, mapperBlock, getInfoInstruction, randonHex } from "../utils";
 import { SlotMemory, TypeMapping, ResultAccess } from "./types";
 import { Conjunt, Block } from "./Conjunt";
 import { History } from "./History";
@@ -20,7 +20,7 @@ Array.prototype.exists = function (content: any) {
  */
 export class Cache {
 
-  public memoryP: SlotMemory;
+  public memoryPrimary: SlotMemory;
   public blocks: number;
   public blocksPerConjunt: number;
   public wordsPerBlock: number;
@@ -38,12 +38,12 @@ export class Cache {
 
   /**
    * @param memory            - memória principal
-   * @param blocks        - total de slots no Cache
-   * @param blocksPerConjunt            - quantidade de blocos por conjunto (Potência de 2)
+   * @param blocks            - total de slots/blocks no Cache
+   * @param blocksPerConjunt  - quantidade de blocos por conjunto (Potência de 2)
    * @param wordsInBlock      - quantidade palavras por bloco (Potência de 2)
    */
   constructor(memory: string, blocks: string, blocksPerConjunt: number, wordsInBlock: number) {
-    this.memoryP = mapperMemory(memory);
+    this.memoryPrimary = mapperMemory(memory);
     this.blocks = mapperBlock(blocks);
     this.blocksPerConjunt = +blocksPerConjunt;
     this.wordsPerBlock = +wordsInBlock;
@@ -97,7 +97,7 @@ export class Cache {
    */
   getData(addressHex: string) {
     const bin = formatBinary(this.memoryInBits, convert.hex2bin(addressHex))
-    const { tag, index, offset } = getInfoInstruction(bin, this.formatInstruction)
+    const { tag, index } = getInfoInstruction(bin, this.formatInstruction)
 
     if (!Object.keys(this.conjunt).exists(index)) {
       throw `Endereço inválido! O índice ${index || 'NULL'} está fora da faixa ou nula`;
@@ -141,18 +141,26 @@ export class Cache {
     this.conjunt[index] = data;
   }
 
+  getRandomAddress() {
+    return randonHex(this.memoryInBytes)
+  }
+
   /**
    * log2(blocks/blocksPerConjunt) (bits)
    */
   get bitsIndex() {
-    return Math.log2(this.blocks / this.blocksPerConjunt);
+    return Math.round(Math.log2(this.blocks / this.blocksPerConjunt));
   }
 
   /**
    * log2(wordsPerBlock) (bits)
    */
   get bitsOffset() {
-    return Math.log2(this.wordsPerBlock);
+    return Math.log2(this.wordsPerBlock * 4);
+  }
+
+  get bytesInWords() {
+    return this.wordsPerBlock * 4
   }
 
   /**
@@ -162,12 +170,16 @@ export class Cache {
     return (this.memoryInBits) - (this.bitsIndex + this.bitsOffset);
   }
 
+  get conjuntInBytes() {
+    return this.blocksPerConjunt * this.wordsPerBlock * 4;
+  }
+
   get cacheInBytes() {
-    return this.sizeBlock * this.blocks;
+    return this.blocks * this.wordsPerBlock * 4;
   }
 
   get memoryInBytes() {
-    return memoryToBytes(this.memoryP);
+    return memoryToBytes(this.memoryPrimary);
   }
 
   get memoryInBits() {
@@ -195,22 +207,14 @@ export class Cache {
     return { tag, index, offset }
   }
 
-  /**
-   * @description retorna o tamanho de um bloco
-   * log2(m) * MpBits (bytes)
-   */
-  get sizeBlock() {
-    return Math.pow(2, this.bitsOffset)
-  }
 
   /**
-   *
-   * @description Valor total de bits na cache usando Mapeamento Direto
+   * @description Valor total de bits num bloco usando Mapeamento Direto
    */
   get totalOfBits(): number { // [2^indice * ((sizeBlock) + (sizeTag))] (bits)
-    const { bitsTag, bitsIndex, sizeBlock, memoryInBits } = this;
+    const { bitsTag, bitsIndex, blocks, memoryInBits } = this;
 
-    return Math.pow(2, bitsIndex) * ((sizeBlock + memoryInBits) + bitsTag);
+    return Math.pow(2, bitsIndex) * ((blocks + memoryInBits) + bitsTag);
   }
 
   /**

@@ -17,7 +17,7 @@ export const requestConfigs: QuestionCollection = [{
 {
   type: 'input',
   name: 'slotsCache',
-  message: 'Blocos no cache:'
+  message: 'Quantidade de blocos:'
 },
 {
   type: 'input',
