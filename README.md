@@ -7,7 +7,7 @@
 
 ### Cache Simulator in Typescript
 
-![Simulador de Cache](/demo.png)
+![Simulador de Cache](demo.png)
 
 
 ## Requeriments
