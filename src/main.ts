@@ -40,7 +40,6 @@ async function demoMemory(cache: Cache) {
   }
 
   try {
-    showInfoCache(cache)
     showMemory(cache, address);
     showRatioOfCache(cache);
   } catch (error) {

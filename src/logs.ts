@@ -8,16 +8,17 @@ function showInfoCache(cache: Cache) {
   console.log(`
     Memoria Principal: ${cache.memoryInBytes} bytes
     Bits: ${cache.memoryInBits}
-    Memoria Cache: ${cache.cacheInBytes} bytes
-    Blocos: ${cache.blocksPerConjunt}
-    Palavras: ${cache.wordsPerBlock}
+    Blocos: ${cache.blocks}
+    Blocos por conjunto: ${cache.blocksPerConjunt}
+    Palavras por bloco: ${cache.wordsPerBlock}
 
     // MAPEAMENTO ${cache.typeMapping}
     TAG ${cache.formatInstruction.tag} (bits)
     IND ${cache.formatInstruction.index} (bits)
     OFF ${cache.formatInstruction.offset} (bits)
 
-    Tamanho do bloco: ${cache.conjuntInBytes} bytes
+    Tamanho de conjunto: ${cache.conjuntInBytes} bytes
+    Tamanho de palavra: ${cache.bytesInWords} bytes
     Tamanho do cache: ${cache.cacheInBytes} bytes
 
   `)
@@ -57,7 +58,9 @@ function showMemory(cache: Cache, addressHex: string) {
   `)
 
   for (const index of Object.keys(cache.conjunt).sort()) {
-    console.log(`    {${chalk.blue(index)}}: [${chalk.bold(cache.conjunt[index].v)}][ ${chalk.green(cache.conjunt[index].data)} ]`)
+    if (cache.conjunt[index].data.length) {
+      console.log(`    {${chalk.blue(index)}}: [${chalk.bold(cache.conjunt[index].v)}][ ${chalk.green(cache.conjunt[index].data)} ]`)
+    }
   }
 }
 
