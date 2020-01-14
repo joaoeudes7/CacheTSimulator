@@ -1,4 +1,4 @@
-# CacheTSimulator
+# CacheTSimulator CLI version
 
 ![](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)
 ![](https://definitelytyped.org/badges/standard-flat.svg)
