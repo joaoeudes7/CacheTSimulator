@@ -27,10 +27,11 @@ async function demoMemory(cache: Cache) {
 
   if (option == 'insert') {
     const data = await prompt(requestManualAddress)
-    const addressesBin = extractAddresses(data['adress'])
+    const addressesBin = extractAddressesInput(data['adress'])
     const addressesHex = addressesBin.map(b => convert.bin2hex(b))
 
     address = addressesHex[addressesHex.length - 1]
+
     addressesHex.forEach(address => {
       cache.getData(address)
     })
@@ -49,9 +50,9 @@ async function demoMemory(cache: Cache) {
   demoMemory(cache);
 }
 
-function extractAddresses(stringAddresses: string) {
+function extractAddressesInput(stringAddresses: string) {
   // Formatter: remove spaces && symbols
-  const _stringAddresses = stringAddresses.replace(/\s+/g, '').replace('[', '').replace(']', '');
+  const _stringAddresses = stringAddresses.replace(/\[|\]|\s+/g, '');
   const addresses = _stringAddresses.split(',')
 
   return addresses
