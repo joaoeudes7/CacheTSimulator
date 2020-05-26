@@ -8,12 +8,12 @@
     "start": "node ./dist/main.js"
   },
   "devDependencies": {
-    "ts-node": "^8.5.4",
-    "typescript": "^3.7.2"
+    "ts-node": "^8.10.1",
+    "typescript": "^3.9.3"
   },
   "dependencies": {
     "@types/inquirer": "^6.5.0",
-    "chalk": "^3.0.0",
-    "inquirer": "^7.0.0"
+    "chalk": "^4.0.0",
+    "inquirer": "^7.1.0"
   }
 }
