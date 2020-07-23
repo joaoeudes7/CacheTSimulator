@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@types/inquirer": "^6.5.0",
-    "chalk": "^4.0.0",
+    "chalk": "^4.1.0",
     "inquirer": "^7.1.0"
   }
 }
