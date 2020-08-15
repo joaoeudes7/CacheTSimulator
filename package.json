@@ -12,7 +12,7 @@
     "typescript": "^3.9.7"
   },
   "dependencies": {
-    "@types/inquirer": "^6.5.0",
+    "@types/inquirer": "^7.3.0",
     "chalk": "^4.1.0",
     "inquirer": "^7.1.0"
   }
